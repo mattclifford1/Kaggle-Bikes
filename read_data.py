@@ -3,7 +3,7 @@ import os
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
+from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
@@ -37,7 +37,7 @@ def read_csv(csv_file, test_size=0.33):
 
 def train(X_train, y_train):
     # fit SVM
-    clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+    clf = make_pipeline(StandardScaler(), SVR(gamma='auto'))
     clf.fit(X_train, y_train)
     return clf
 
