@@ -28,7 +28,6 @@ def read_csv(csv_file, test_size=0.33):
                 'day']
     target = 'bikes'
     # split into train/val
-
     X_train, X_test, y_train, y_test = train_test_split(pd_dataframe[features].to_numpy(),
                                                         pd_dataframe[target].to_numpy(),
                                                         test_size=test_size)
@@ -48,6 +47,9 @@ def test_MAE(X_test, y_test, clf):
     return mean_absolute_error(y_test, clf.predict(X_test))
 
 def run_single_and_all_stations():
+    """Train and test on single stations and on all stations.
+    Return the MAE for both cases.
+    """
     dir = './data/Train/Train'
     files = os.listdir(dir)
     results = []
@@ -66,10 +68,10 @@ def run_single_and_all_stations():
             results.append(test_MAE(X_test, y_test, train(X_train, y_train)))
     single = sum(results)/len(results)
     # now do all stations at once
-    X_trains = pd.concat(dataframes['X_train'])
-    X_tests = pd.concat(dataframes['X_test'])
-    y_trains = pd.concat(dataframes['y_train'])
-    y_tests = pd.concat(dataframes['y_test'])
+    X_trains = np.concatenate(dataframes['X_train'])
+    X_tests = np.concatenate(dataframes['X_test'])
+    y_trains = np.concatenate(dataframes['y_train'])
+    y_tests = np.concatenate(dataframes['y_test'])
     all = test_MAE(X_tests, y_tests, train(X_trains, y_trains))
     return single, all
 
@@ -87,6 +89,10 @@ def iterate_all():
 
 
 if __name__ == '__main__':
+    # Validate on single and all stations
+    single, all = run_single_and_all_stations()
+    
+    save_output=False
     pd_dataframe = pd.read_csv('./data/test.csv')
     y_preds = []
     num_prev = -1   # there are no -1 value station
@@ -108,4 +114,5 @@ if __name__ == '__main__':
         # if id == 5:
         #     break
     df = pd.DataFrame(y_preds)
-    df.to_csv('preds.csv', index=False, header=['Id', 'bikes'])
+    if save_output:
+        df.to_csv('preds.csv', index=False, header=['Id', 'bikes'])
