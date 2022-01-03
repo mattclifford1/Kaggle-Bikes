@@ -84,13 +84,13 @@ def iterate_all():
         results_all.append(all)
         print(single, all)
     print('========= ALL =========')
-    print(sum(results_single)/len(results_single))
-    print(sum(results_all)/len(results_all))
+    print(f'Results on single stations: {sum(results_single)/len(results_single)}')
+    print(f'Results on all stations: {sum(results_all)/len(results_all)}')
 
 
 if __name__ == '__main__':
     # Validate on single and all stations
-    single, all = run_single_and_all_stations()
+    iterate_all()
     
     save_output=False
     pd_dataframe = pd.read_csv('./data/test.csv')
