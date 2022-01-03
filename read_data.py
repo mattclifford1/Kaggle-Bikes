@@ -7,6 +7,7 @@ from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
+import xgboost as xg
 
 
 def get_csv_file_from_num(num):
@@ -34,19 +35,35 @@ def read_csv(csv_file, test_size=0.33):
                                                         # random_state=42)
     return X_train, X_test, y_train, y_test
 
-def train(X_train, y_train):
-    # fit SVM
-    clf = make_pipeline(StandardScaler(), SVR(gamma='auto'))
-    clf.fit(X_train, y_train)
-    return clf
+def train(X_train, y_train, models_list):
+    """ Train a model and return it"""
+    clfs =[]
+    if 'SVM' in models_list:
+        # fit SVM
+        clf = make_pipeline(StandardScaler(), SVR(gamma='auto'))
+        clf.fit(X_train, y_train)
+        clfs.append(clf)
+    if 'XGBoost' in models_list:
+        clf = xg.XGBRegressor(objective ='reg:squarederror',
+              n_estimators = 20, seed = 123)
+        clf.fit(X_train, y_train)
+        clfs.append(clf)
+    return clfs
 
-def test_MAE(X_test, y_test, clf):
+def model_predict(clfs, X_test):
+    predictions = []
+    for clf in clfs:
+        predictions.append(clf.predict(X_test))
+    prediction = np.mean(predictions, axis=0)
+    return prediction
+    
+def test_MAE(X_test, y_test, clfs):
     # MAE - we use this becuase getting close to the true prediction is what we want, not exactly the right bikes like accuracy would give
     # print('Train MAE: ', mean_absolute_error(y_train, clf.predict(X_train)))
     # print('Test MAE: ', mean_absolute_error(y_test, clf.predict(X_test)))
-    return mean_absolute_error(y_test, clf.predict(X_test))
+    return mean_absolute_error(y_test, model_predict(clfs, X_test))
 
-def run_single_and_all_stations():
+def run_single_and_all_stations(models_list):
     """Train and test on single stations and on all stations.
     Return the MAE for both cases.
     """
@@ -65,21 +82,21 @@ def run_single_and_all_stations():
             dataframes['X_test'].append(X_test)
             dataframes['y_train'].append(y_train)
             dataframes['y_test'].append(y_test)
-            results.append(test_MAE(X_test, y_test, train(X_train, y_train)))
+            results.append(test_MAE(X_test, y_test, train(X_train, y_train, models_list)))
     single = sum(results)/len(results)
     # now do all stations at once
     X_trains = np.concatenate(dataframes['X_train'])
     X_tests = np.concatenate(dataframes['X_test'])
     y_trains = np.concatenate(dataframes['y_train'])
     y_tests = np.concatenate(dataframes['y_test'])
-    all = test_MAE(X_tests, y_tests, train(X_trains, y_trains))
+    all = test_MAE(X_tests, y_tests, train(X_trains, y_trains, models_list))
     return single, all
 
-def iterate_all():
+def iterate_all(models_list):
     results_single = []
     results_all = []
     for i in range(5):
-        single, all = run_single_and_all_stations()
+        single, all = run_single_and_all_stations(models_list)
         results_single.append(single)
         results_all.append(all)
         print(single, all)
@@ -90,9 +107,10 @@ def iterate_all():
 
 if __name__ == '__main__':
     # Validate on single and all stations
-    iterate_all()
+    #models_list = ['XGBoost']
+    #iterate_all(models_list)
     
-    save_output=False
+    save_output=True
     pd_dataframe = pd.read_csv('./data/test.csv')
     y_preds = []
     num_prev = -1   # there are no -1 value station
@@ -100,7 +118,7 @@ if __name__ == '__main__':
         num = pd_dataframe.loc[id-1, 'station']
         if num != num_prev:
             X_train, _, y_train, _ = read_csv(get_csv_file_from_num(num), test_size=int(1))
-            clf = train(X_train, y_train)
+            clfs = train(X_train, y_train, ['XGBoost'])
             features = ['bikes_3h_ago',
                         'short_profile_bikes',
                         'short_profile_3h_diff_bikes',
@@ -108,11 +126,11 @@ if __name__ == '__main__':
                         'weekhour',
                         'day']
         X_test = np.expand_dims(pd_dataframe.loc[id-1][features].values, 0)
-        y_pred = clf.predict(X_test)
+        y_pred = model_predict(clfs, X_test)
         y_preds.append([id, int(y_pred[0])])
         num_prev = num
         # if id == 5:
         #     break
     df = pd.DataFrame(y_preds)
     if save_output:
-        df.to_csv('preds.csv', index=False, header=['Id', 'bikes'])
+        df.to_csv('preds_XGBoost.csv', index=False, header=['Id', 'bikes'])
