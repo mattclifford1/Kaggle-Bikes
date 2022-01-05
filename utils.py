@@ -10,6 +10,14 @@ import numpy as np
 import os
 import json
 
+def normalise_data(pd_dataframe, features):
+    z_norm_dict = read_dict('data/z_norm_dict.txt')
+    for feature in features:
+        if feature in ['station', 'isHoliday']:
+            continue
+        pd_dataframe[feature] = pd_dataframe[feature].apply(lambda x: (x - z_norm_dict[feature][0]) / z_norm_dict[feature][1])
+    return pd_dataframe
+
 def create_numDocks_Dict():
     """ Create dictionary as {station: numDocks}"""
     dir = './data/Train/Train'
@@ -35,7 +43,7 @@ def z_norm():
             df = pd.read_csv(abs_path)
             dfs.append(df)
     dataframe = pd.concat(dfs)    # complete df
-    
+
     for col in dataframe.columns:
         values = dataframe[col]
         if values.dtype == 'O':    # this checks that the column is of type "object" (string)
@@ -50,17 +58,20 @@ def read_dict(path):
     with open(path,'r') as json_file:
         return json.load(json_file)
 
+def write_dict(dic, path):
+    with open(path,'w') as fp:
+        fp.write(json.dumps(dic))
+
+
 if __name__=='__main__':
     # Pipeline
-    create_numDocks = False
+    create_numDocks = True
     create_z_norm = True
-    
+
     if create_numDocks:
         numDocks_dict = create_numDocks_Dict()
-        with open('data/numDocks_dict.txt','w') as fp:
-            fp.write(json.dumps(numDocks_dict))
-    
+        write_dict(numDocks_dict, 'data/numDocks_dict.txt')
+
     if create_z_norm:
         z_norm_dict = z_norm()
-        with open('data/z_norm_dict.txt','w') as fp:
-            fp.write(json.dumps(z_norm_dict))
+        write_dict(z_norm_dict, 'data/z_norm_dict.txt')
