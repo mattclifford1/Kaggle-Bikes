@@ -90,7 +90,7 @@ def run_test_preds(dir='./data/test.csv'):
 
 if __name__ == '__main__':
     # Validate on single and all stations
-    run_name = './predictions/preds_z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)
+    run_name = 'z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)
     if ARGS.quick_validation:
         results_single, results_all = iterate_all()
         write_results(results_single, run_name+'-single')
@@ -99,4 +99,4 @@ if __name__ == '__main__':
     if ARGS.save_test_preds:
         y_preds = run_test_preds()
         df = pd.DataFrame(y_preds)
-        df.to_csv(run_name+'.csv', index=False, header=['Id', 'bikes'])
+        df.to_csv('./predictions/preds_'+run_name+'.csv', index=False, header=['Id', 'bikes'])

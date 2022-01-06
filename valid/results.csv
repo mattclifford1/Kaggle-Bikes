@@ -1,2 +1,2 @@
-./predictions/preds_zFalse_models['XGBoost']bikes-single,./predictions/preds_zFalse_models['XGBoost']bikes-all
-"[2.067729292437566, 2.118772236287349, 2.0568230273013657]","[2.456423659525442, 2.474830235303875, 2.4646029969981167]"
+zFalse_models['XGBoost']bikes-single,zFalse_models['XGBoost']bikes-all
+"[2.0416799731339914, 2.089669079384716, 2.0698713419194075]","[2.42182611147523, 2.4843616230304995, 2.4473786306045024]"

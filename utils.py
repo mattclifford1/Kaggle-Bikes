@@ -89,6 +89,12 @@ def write_results(results, name, file='./valid/results.csv'):
 def read_results(file='./valid/results.csv'):
     return pd.read_csv(file)
 
+def string_to_list(string):
+    # string: '[2.11, 3.11]'
+    list_strings = string[1:-1].split(', ')
+    list_float = [float(x) for x in list_strings]
+    return list_float
+
 def read_dict(path):
     with open(path,'r') as json_file:
         return json.load(json_file)
