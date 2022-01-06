@@ -4,8 +4,9 @@ from sklearn.metrics import mean_absolute_error
 import numpy as np
 from tqdm import tqdm
 from utils import write_dict, read_dict
+from read_data import get_all_model_csvs
 
-def pred_model(model_csv, test_df):
+def pred_pretrained_model(model_csv, test_df):
     model_df = pd.read_csv(model_csv)
     preds = []
     # make prediction
@@ -14,16 +15,9 @@ def pred_model(model_csv, test_df):
     return preds
 
 def MAE_model(model_csv, test_df):
-    preds = pred_model(model_csv, test_df)
+    preds = pred_pretrained_model(model_csv, test_df)
     return mean_absolute_error(test_df['bikes'].to_numpy(), preds)
 
-def get_all_model_csvs(dir='./data/Models/Models'):
-    csvs = []
-    files = os.listdir(dir)
-    for file in files:
-        if os.path.splitext(file)[-1] == '.csv':
-            csvs.append(os.path.join(dir, file))
-    return csvs
 
 def run_all_stations(dir='./data/Train/Train'):
     model_csvs = get_all_model_csvs()
@@ -47,7 +41,7 @@ def run_all_stations(dir='./data/Train/Train'):
 
 
 if __name__ == '__main__':
-    dict_path = './best_linear_models.txt'
+    dict_path = './data/best_linear_models.txt'
     if os.path.exists(dict_path):
         best_model_each_station = read_dict(dict_path)
     else:

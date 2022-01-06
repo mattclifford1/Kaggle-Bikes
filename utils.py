@@ -9,34 +9,36 @@ import pandas as pd
 import numpy as np
 import os
 import json
+from sklearn.metrics import mean_absolute_error
+from training_params import FEATURES, TARGET
 
-def normalise_data(pd_dataframe, features):
-    z_norm_dict = read_dict('data/z_norm_dict.txt')
-    for feature in features:
+def normalise_data(pd_dataframe):
+    Z_NORM_dict = read_dict('data/Z_NORM_dict.txt')
+    for feature in FEATURES:
         if feature in ['station', 'isHoliday']:
             continue
-        pd_dataframe[feature] = pd_dataframe[feature].apply(lambda x: (x - z_norm_dict[feature][0]) / z_norm_dict[feature][1])
+        pd_dataframe[feature] = pd_dataframe[feature].apply(lambda x: (x - Z_NORM_dict[feature][0]) / Z_NORM_dict[feature][1])
     return pd_dataframe
 
-def create_numDocks_Dict():
+def create_max_docks_per_station_dict():
     """ Create dictionary as {station: numDocks}"""
     dir = './data/Train/Train'
     files = os.listdir(dir)
     dfs = []
-    numDocks_dict = dict()
+    max_docks_per_station = dict()
     for file in files:
         if os.path.splitext(file)[-1] == '.csv':
             abs_path = os.path.join(dir, file)
             df = pd.read_csv(abs_path)[['station', 'numDocks']]
-            numDocks_dict[int(df.station.unique().item())] = int(df.numDocks.unique().item())
-    return numDocks_dict
+            max_docks_per_station[int(df.station.unique().item())] = int(df.numDocks.unique().item())
+    return max_docks_per_station
 
-def z_norm():
-    """ Z-norm over all the features """
+def creat_z_norm_dict():
+    """ Z-norm over all the FEATURES """
     dir = './data/Train/Train'
     files = os.listdir(dir)
     dfs = []
-    z_norm_dict = dict()
+    Z_NORM_dict = dict()
     for file in files:
         if os.path.splitext(file)[-1] == '.csv':
             abs_path = os.path.join(dir, file)
@@ -50,9 +52,27 @@ def z_norm():
             continue
         mean = np.mean(values)
         std_dev = np.std(values)
-        z_norm_dict[col] = [mean, std_dev]
-    return z_norm_dict
+        Z_NORM_dict[col] = [mean, std_dev]
+    return Z_NORM_dict
 
+def test_MAE(X_test, y_test, clfs):
+    # MAE - we use this becuase getting close to the true prediction is what we want, not exactly the right bikes like accuracy would give
+    # print('Train MAE: ', mean_absolute_error(y_train, clf.predict(X_train)))
+    # print('Test MAE: ', mean_absolute_error(y_test, clf.predict(X_test)))
+
+    return mean_absolute_error(y_test, model_predict(clfs, X_test))
+
+def model_predict(clfs, X_test):
+    predictions = []
+    for clf in clfs:
+        predictions.append(clf.predict(X_test))
+    prediction = np.mean(predictions, axis=0)
+    # If TARGET is bikes percent, we need to scale the output
+    if TARGET == 'bikes_percent':
+        station = X_test[:, -1]    # station is the last element in the array.
+        numDocks = np.array([MAX_DOCKS_PER_STATION[str(int(i))] for i in station])
+        prediction = (numDocks * prediction)
+    return prediction
 
 def read_dict(path):
     with open(path,'r') as json_file:
@@ -66,12 +86,12 @@ def write_dict(dic, path):
 if __name__=='__main__':
     # Pipeline
     create_numDocks = True
-    create_z_norm = True
+    create_Z_NORM = True
 
     if create_numDocks:
-        numDocks_dict = create_numDocks_Dict()
-        write_dict(numDocks_dict, 'data/numDocks_dict.txt')
+        max_docks_per_station = create_max_docks_per_station_dict()
+        write_dict(max_docks_per_station, 'data/max_docks_per_station.txt')
 
-    if create_z_norm:
-        z_norm_dict = z_norm()
-        write_dict(z_norm_dict, 'data/z_norm_dict.txt')
+    if create_Z_NORM:
+        Z_NORM_dict = creat_z_norm_dict()
+        write_dict(Z_NORM_dict, 'data/Z_NORM_dict.txt')
