@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from utils import normalise_data
 from sklearn.model_selection import train_test_split
-from training_params import Z_NORM, FEATURES
+from training_params import ARGS
 
 def get_csv_file_from_num(num):
     return './data/Train/Train/station_'+str(num)+'_deploy.csv'
@@ -15,10 +15,10 @@ def split_training_data(csv_file, test_size=0.33):
     #get rid of na rows
     pd_dataframe= pd_dataframe.dropna()
     pd_dataframe['bikes_percent'] = (pd_dataframe['bikes'] / pd_dataframe['numDocks'])
-    if Z_NORM:
+    if ARGS.z_norm:
         pd_dataframe = normalise_data(pd_dataframe)
     # split into train/val
-    X_train, X_test, y_train, y_test = train_test_split(pd_dataframe[FEATURES].to_numpy(),
+    X_train, X_test, y_train, y_test = train_test_split(pd_dataframe[ARGS.features].to_numpy(),
                                                         pd_dataframe['bikes'].to_numpy(),
                                                         test_size=test_size)
                                                         #random_state=42)

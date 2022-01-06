@@ -8,21 +8,21 @@ from tqdm import tqdm
 import xgboost as xg
 from utils import read_dict, test_MAE, model_predict, normalise_data
 from read_data import get_csv_file_from_num, split_training_data, get_training_csvs
-from training_params import TARGET, MODELS_LIST, MAX_DOCKS_PER_STATION_FILE, Z_NORM, QUICK_VALIDATION, SAVE_TEST_PREDS, FEATURES
+from training_params import ARGS
 
-MAX_DOCKS_PER_STATION = read_dict(MAX_DOCKS_PER_STATION_FILE)
+MAX_DOCKS_PER_STATION = read_dict(ARGS.max_docks_per_station_file)
 
 def train(X_train, y_train):
     """ Train a model and return it"""
     clfs =[]
-    if TARGET == 'bikes_percent':
+    if ARGS.target == 'bikes_percent':
         y_train = y_train  / [MAX_DOCKS_PER_STATION[str(int(X_train[i, -1]))] for i in range(X_train.shape[0])]
-    if 'SVR' in MODELS_LIST:
+    if 'SVR' in ARGS.models_list:
         # fit SVM
         clf = make_pipeline(StandardScaler(), SVR(gamma='auto'))
         clf.fit(X_train, y_train)
         clfs.append(clf)
-    if 'XGBoost' in MODELS_LIST:
+    if 'XGBoost' in ARGS.models_list:
         clf = xg.XGBRegressor(objective ='reg:squarederror',
               n_estimators = 20, seed = 123)
         clf.fit(X_train, y_train)
@@ -58,7 +58,7 @@ def run_single_and_all_stations():
 def iterate_all():
     results_single = []
     results_all = []
-    for i in range(5):
+    for i in range(ARGS.val_runs):
         single, all = run_single_and_all_stations()
         results_single.append(single)
         results_all.append(all)
@@ -69,7 +69,7 @@ def iterate_all():
 
 def run_test_preds(dir='./data/test.csv'):
     pd_dataframe = pd.read_csv(dir)
-    if Z_NORM:
+    if ARGS.z_norm:
         pd_dataframe = normalise_data(pd_dataframe)
     y_preds = []
     num_prev = -1   # there are no -1 value station
@@ -79,7 +79,7 @@ def run_test_preds(dir='./data/test.csv'):
             X_train, _, y_train, _ = split_training_data(get_csv_file_from_num(num),
                                                          test_size=int(1))
             clfs = train(X_train, y_train)
-        X_test = np.expand_dims(pd_dataframe.loc[id-1][FEATURES].values, 0)
+        X_test = np.expand_dims(pd_dataframe.loc[id-1][ARGS.features].values, 0)
         y_pred = model_predict(clfs, X_test)
         y_preds.append([id, int(y_pred[0])])
         num_prev = num
@@ -89,10 +89,10 @@ def run_test_preds(dir='./data/test.csv'):
 
 if __name__ == '__main__':
     # Validate on single and all stations
-    if QUICK_VALIDATION:
+    if ARGS.quick_validation:
         iterate_all()
     # get predictions for kaggle test data and save to csv for submission
-    if SAVE_TEST_PREDS:
+    if ARGS.save_test_preds:
         y_preds = run_test_preds()
         df = pd.DataFrame(y_preds)
-        df.to_csv('./predictions/preds_z'+str(Z_NORM)+'_models'+str(MODELS_LIST)+str(TARGET)+'.csv', index=False, header=['Id', 'bikes'])
+        df.to_csv('./predictions/preds_z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)+'.csv', index=False, header=['Id', 'bikes'])

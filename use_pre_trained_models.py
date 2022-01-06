@@ -51,9 +51,9 @@ if __name__ == '__main__':
     # analyse what models are selected/ performing best
     results_dict = {}
     for model in best_model_each_station.values():
-        model_features_name = '-'.join(model.split('_')[4:])
-        if model_features_name in results_dict.keys():
-            results_dict[model_features_name] += 1
+        model_ARGS.features_name = '-'.join(model.split('_')[4:])
+        if model_ARGS.features_name in results_dict.keys():
+            results_dict[model_ARGS.features_name] += 1
         else:
-            results_dict[model_features_name] = 0
+            results_dict[model_ARGS.features_name] = 0
     print(results_dict)
