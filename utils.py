@@ -81,9 +81,13 @@ def write_results(results, name, file='./valid/results.csv'):
         data[name] = [results]
     else:
         dir = os.path.dirname(file)
-        os.makedirs(dir)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
         data = pd.DataFrame({name: [results]})
-    data.to_csv(file)
+    data.to_csv(file, index=False)
+
+def read_results(file='./valid/results.csv'):
+    return pd.read_csv(file)
 
 def read_dict(path):
     with open(path,'r') as json_file:
@@ -97,12 +101,12 @@ def write_dict(dic, path):
 if __name__=='__main__':
     # Pipeline
     create_numDocks = True
-    create_ARGS.z_norm = True
+    create_zNorm = True
 
     if create_numDocks:
         max_docks_per_station = create_max_docks_per_station_dict()
         write_dict(max_docks_per_station, 'data/max_docks_per_station.txt')
 
-    if create_ARGS.z_norm:
+    if create_zNorm:
         ARGS.z_norm_dict = create_znorm_dict()
         write_dict(ARGS.z_norm_dict, 'data/ARGS.z_norm_dict.txt')
