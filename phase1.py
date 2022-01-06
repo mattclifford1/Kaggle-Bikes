@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 from tqdm import tqdm
 import xgboost as xg
-from utils import read_dict, test_MAE, model_predict, normalise_data
+from utils import read_dict, test_MAE, model_predict, normalise_data, write_results
 from read_data import get_csv_file_from_num, split_training_data, get_training_csvs
 from training_params import ARGS
 
@@ -66,6 +66,7 @@ def iterate_all():
     print('========= ALL =========')
     print(f'Results on single stations: {sum(results_single)/len(results_single)}')
     print(f'Results on all stations: {sum(results_all)/len(results_all)}')
+    return results_single, results_all
 
 def run_test_preds(dir='./data/test.csv'):
     pd_dataframe = pd.read_csv(dir)
@@ -89,10 +90,13 @@ def run_test_preds(dir='./data/test.csv'):
 
 if __name__ == '__main__':
     # Validate on single and all stations
+    run_name = './predictions/preds_z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)
     if ARGS.quick_validation:
-        iterate_all()
+        results_single, results_all = iterate_all()
+        write_results(results_single, run_name+'-single')
+        write_results(results_all, run_name+'-all')
     # get predictions for kaggle test data and save to csv for submission
     if ARGS.save_test_preds:
         y_preds = run_test_preds()
         df = pd.DataFrame(y_preds)
-        df.to_csv('./predictions/preds_z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)+'.csv', index=False, header=['Id', 'bikes'])
+        df.to_csv(run_name+'.csv', index=False, header=['Id', 'bikes'])

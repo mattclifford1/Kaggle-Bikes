@@ -74,6 +74,17 @@ def model_predict(clfs, X_test):
         prediction = (numDocks * prediction)
     return prediction
 
+# write validation results to file for comparision of models later
+def write_results(results, name, file='./valid/results.csv'):
+    if os.path.exists(file):
+        data = pd.read_csv(file)
+        data[name] = [results]
+    else:
+        dir = os.path.dirname(file)
+        os.makedirs(dir)
+        data = pd.DataFrame({name: [results]})
+    data.to_csv(file)
+
 def read_dict(path):
     with open(path,'r') as json_file:
         return json.load(json_file)
