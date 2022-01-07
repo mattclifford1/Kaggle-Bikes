@@ -1,6 +1,22 @@
 # Kaggle-Bikes
 [Trello Board](https://trello.com/b/EZbPiQSd/kaggle)
 
+# Usage
+Command line options are found in [training_params.py](training_params.py).
+
+To run phase1 (with saving validation results to file):
+```
+python phase1.py -q --val_run 10
+```
+
+To plot validation results use:
+```
+python plot_results.py
+```
+
+# Extras
+If you do not have `max_docks_per_station.txt` or `zNorm_dict.txt` run `python utils.py` 
+
 # Rough Notes
 Model assesment, we use MAE since this is a regresssion problem. - Maybe have a think about other metrics?
 ## Phase 1 - Comparing single vs all stations
