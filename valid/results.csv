@@ -1,2 +1,2 @@
-zFalse_models['XGBoost']bikes-single,zFalse_models['XGBoost']bikes-all
-"[2.0416799731339914, 2.089669079384716, 2.0698713419194075]","[2.42182611147523, 2.4843616230304995, 2.4473786306045024]"
+zFalse_models['XGBoost']bikes-single,zFalse_models['XGBoost']bikes-all,"zFalse_models['XGBoost', 'SVM']bikes-single","zFalse_models['XGBoost', 'SVM']bikes-all","zFalse_models['XGBoost', 'SVR']bikes-single","zFalse_models['XGBoost', 'SVR']bikes-all"
+"[2.067024275435677, 2.0730777542161793]","[2.4625754620745144, 2.4407280100575575]","[2.0632098081722483, 2.0798610411451945]","[2.4437148718424933, 2.4283951350613266]","[2.132548609871241, 2.114233069258017]","[2.41065698634814, 2.402494605711675]"

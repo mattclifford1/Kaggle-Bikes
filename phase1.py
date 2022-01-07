@@ -58,11 +58,11 @@ def run_single_and_all_stations():
 def iterate_all():
     results_single = []
     results_all = []
-    for i in range(ARGS.val_runs):
+    for i in tqdm(range(ARGS.val_runs)):
         single, all = run_single_and_all_stations()
         results_single.append(single)
         results_all.append(all)
-        print(single, all)
+        # print(single, all)
     print('========= ALL =========')
     print(f'Results on single stations: {sum(results_single)/len(results_single)}')
     print(f'Results on all stations: {sum(results_all)/len(results_all)}')

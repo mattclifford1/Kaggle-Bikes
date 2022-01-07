@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
+allowed_models = ['SVR', 'XGBoost']
 parser = ArgumentParser()
-parser.add_argument("-m", "--models_list", nargs="+", default=['SVR', 'XGBoost'])
+parser.add_argument("-m", "--models_list", nargs="+", default=allowed_models)
 parser.add_argument("--target", default='bikes')
 parser.add_argument("--max_docks_per_station_file", default='data/max_docks_per_station.txt')
 parser.add_argument("--z_norm", default=False, action='store_true')
@@ -19,6 +20,9 @@ parser.add_argument("--features", nargs="+", default=['bikes_3h_ago',
 
 ARGS = parser.parse_args()
 
+for model in ARGS.models_list:
+    if model not in allowed_models:
+        raise ValueError('model '+model+' not in available models: '+str(allowed_models))
 # # GLOBAL VARIABLES
 # ARGS.target = 'bikes'    # 'bikes' or 'bikes_percent'
 # ARGS.models_list = ['XGBoost']      # it must be a list - ['SVR', 'XGBoost']

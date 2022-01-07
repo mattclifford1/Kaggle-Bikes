@@ -13,11 +13,11 @@ from sklearn.metrics import mean_absolute_error
 from training_params import ARGS
 
 def normalise_data(pd_dataframe):
-    ARGS.z_norm_dict = read_dict('data/ARGS.z_norm_dict.txt')
+    zNorm_dict = read_dict('data/zNorm_dict.txt')
     for feature in ARGS.features:
         if feature in ['station', 'isHoliday']:
             continue
-        pd_dataframe[feature] = pd_dataframe[feature].apply(lambda x: (x - ARGS.z_norm_dict[feature][0]) / ARGS.z_norm_dict[feature][1])
+        pd_dataframe[feature] = pd_dataframe[feature].apply(lambda x: (x - zNorm_dict[feature][0]) / zNorm_dict[feature][1])
     return pd_dataframe
 
 def create_max_docks_per_station_dict():
@@ -38,7 +38,7 @@ def create_znorm_dict():
     dir = './data/Train/Train'
     files = os.listdir(dir)
     dfs = []
-    ARGS.z_norm_dict = dict()
+    zNorm_dict = dict()
     for file in files:
         if os.path.splitext(file)[-1] == '.csv':
             abs_path = os.path.join(dir, file)
@@ -52,8 +52,8 @@ def create_znorm_dict():
             continue
         mean = np.mean(values)
         std_dev = np.std(values)
-        ARGS.z_norm_dict[col] = [mean, std_dev]
-    return ARGS.z_norm_dict
+        zNorm_dict[col] = [mean, std_dev]
+    return zNorm_dict
 
 def test_MAE(X_test, y_test, clfs):
     # MAE - we use this becuase getting close to the true prediction is what we want, not exactly the right bikes like accuracy would give
@@ -114,5 +114,5 @@ if __name__=='__main__':
         write_dict(max_docks_per_station, 'data/max_docks_per_station.txt')
 
     if create_zNorm:
-        ARGS.z_norm_dict = create_znorm_dict()
-        write_dict(ARGS.z_norm_dict, 'data/ARGS.z_norm_dict.txt')
+        zNorm_dict = create_znorm_dict()
+        write_dict(zNorm_dict, 'data/zNorm_dict.txt')
