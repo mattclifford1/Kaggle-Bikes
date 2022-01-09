@@ -62,6 +62,15 @@ def test_MAE(X_test, y_test, clfs):
 
     return mean_absolute_error(y_test, model_predict(clfs, X_test))
 
+def predict_phase_2_model_numpy(model_csv, X_test):
+    model_df = pd.read_csv(model_csv)
+    # add intercept
+
+    test_df['(Intercept)'] = np.ones(len(test_df))
+    preds = np.dot(test_df[list(model_df['feature'].values)].to_numpy(),
+                   np.expand_dims(model_df['weight'].to_numpy(), axis=1))
+    return preds
+
 def model_predict(clfs, X_test):
     predictions = []
     for clf in clfs:
