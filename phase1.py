@@ -23,8 +23,9 @@ def train(X_train, y_train):
         clf.fit(X_train, y_train)
         clfs.append(clf)
     if 'XGBoost' in ARGS.models_list:
-        clf = xg.XGBRegressor(objective ='reg:squarederror',
-              n_estimators = 20, seed = 123)
+        clf = xg.XGBRegressor(objective='reg:squarederror',
+                              n_estimators=20,
+                              seed=123)
         clf.fit(X_train, y_train)
         clfs.append(clf)
     return clfs
