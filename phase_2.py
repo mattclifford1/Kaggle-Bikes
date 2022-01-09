@@ -16,15 +16,14 @@ def pred_models(model_csvs, test_df):
     '''
     preds = []
     for model_csv in model_csvs:
-        pred = pred_pretrained_model(model_csv, test_df)
         preds.append(pred_pretrained_model(model_csv, test_df))
     return np.mean(np.array(preds), axis=0)  # take mean of ensemble
 
-
 def pred_pretrained_model(model_csv, test_df):
     model_df = pd.read_csv(model_csv)
-    preds = []
     # make prediction
+    if '(Intercept)' not in test_df.columns:
+        test_df['(Intercept)'] = np.ones(len(test_df))
     preds = np.dot(test_df[list(model_df['feature'].values)].to_numpy(),
                    np.expand_dims(model_df['weight'].to_numpy(), axis=1))
     return preds
@@ -36,7 +35,7 @@ def MAE_model(model_csv, test_df):
 def MAE(preds, test_df):
     return mean_absolute_error(test_df['bikes'].to_numpy(), preds)
 
-def run_all_stations(num_model_to_use=2, dir='./data/Train/Train'):
+def get_MAE_all_stations_all_models(dir='./data/Train/Train'):
     '''
     get dict of MAE for each model at each station
     '''
@@ -89,7 +88,7 @@ def get_top_models(MAEs_dict, num_model_to_use=2):
 
 
 def print_top_models(dir='./data/Train/Train'):
-    MAEs_dict = run_all_stations(dir)
+    MAEs_dict = get_MAE_all_stations_all_models(dir)
     best_model_each_station, mean_all = get_top_models(MAEs_dict, num_model_to_use=1)
     # analyse what models are selected/ performing best
     results_dict = {}
@@ -103,7 +102,7 @@ def print_top_models(dir='./data/Train/Train'):
 
 def compare_num_models(dir='./data/Train/Train'):
     MAEs = []
-    MAEs_dict = run_all_stations(dir)
+    MAEs_dict = get_MAE_all_stations_all_models(dir)
     num_models = []
     for i in tqdm(range(1, 200)):
         _, mean_all = get_top_models(MAEs_dict, num_model_to_use=i)
@@ -125,6 +124,6 @@ if __name__ == '__main__':
     # if os.path.exists(dict_path) and load_model:
     #     best_model_each_station = read_dict(dict_path)
     # else:
-    #     best_model_each_station, mean_all = run_all_stations()
+    #     best_model_each_station, mean_all = get_MAE_all_stations_all_models()
     #     write_dict(best_model_each_station, dict_path)
     #     print(mean_all)
