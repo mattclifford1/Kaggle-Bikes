@@ -22,12 +22,12 @@ def MAE_model(model_csv, test_df):
 def run_all_stations(dir='./data/Train/Train'):
     model_csvs = get_all_model_csvs()
     # go through all the training data
-    files = os.listdir(dir)
+    train_stations = os.listdir(dir)
     best_model_each_station = {}
     best_model_error = []
-    for file in tqdm(files):
-        if os.path.splitext(file)[-1] == '.csv':
-            abs_path = os.path.join(dir, file)
+    for station in tqdm(train_stations):
+        if os.path.splitext(station)[-1] == '.csv':
+            abs_path = os.path.join(dir, station)
             train_df = pd.read_csv(abs_path).dropna().reset_index(drop=True)
             # now find which pretrained model fits this station the best
             MAEs = []
@@ -35,14 +35,15 @@ def run_all_stations(dir='./data/Train/Train'):
             for model_csv in model_csvs:
                 MAEs.append(MAE_model(model_csv, train_df))
             argmin = np.argmin(MAEs)
-            best_model_each_station[file] = model_csvs[argmin]
+            best_model_each_station[station] = model_csvs[argmin]
             best_model_error.append(np.min(MAEs))
     return best_model_each_station, np.mean(best_model_error)
 
 
 if __name__ == '__main__':
     dict_path = './data/best_linear_models.txt'
-    if os.path.exists(dict_path):
+    load_model = True
+    if os.path.exists(dict_path) and load_model:
         best_model_each_station = read_dict(dict_path)
     else:
         best_model_each_station, mean_all = run_all_stations()
@@ -51,9 +52,9 @@ if __name__ == '__main__':
     # analyse what models are selected/ performing best
     results_dict = {}
     for model in best_model_each_station.values():
-        model_ARGS.features_name = '-'.join(model.split('_')[4:])
-        if model_ARGS.features_name in results_dict.keys():
-            results_dict[model_ARGS.features_name] += 1
+        model_name = '-'.join(model.split('_')[4:])
+        if model_name in results_dict.keys():
+            results_dict[model_name] += 1
         else:
-            results_dict[model_ARGS.features_name] = 0
+            results_dict[model_name] = 0
     print(results_dict)
