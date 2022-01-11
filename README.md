@@ -1,7 +1,7 @@
 # Requirements
 A python environment with `requirements.txt` installed.
 
-The Kaggle dataset
+The Kaggle dataset places at ./data
 
 # Usage
 ## Automatic
