@@ -104,7 +104,7 @@ def compare_num_models(dir='./data/Train/Train'):
     MAEs = []
     MAEs_dict = get_MAE_all_stations_all_models(dir)
     num_models = []
-    for i in tqdm(range(1, 200)):
+    for i in tqdm(range(1, 50)):
         _, mean_all = get_top_models(MAEs_dict, num_model_to_use=i)
         MAEs.append(mean_all)
         num_models.append(i)

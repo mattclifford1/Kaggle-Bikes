@@ -4,6 +4,10 @@ import pandas as pd
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import VotingRegressor
+from sklearn import linear_model
 from tqdm import tqdm
 import xgboost as xg
 from utils import read_dict, test_MAE, model_predict, normalise_data, write_results
@@ -14,21 +18,46 @@ MAX_DOCKS_PER_STATION = read_dict(ARGS.max_docks_per_station_file)
 
 def train(X_train, y_train):
     """ Train a model and return it"""
-    clfs =[]
+    regs =[]
     if ARGS.target == 'bikes_percent':
         y_train = y_train  / [MAX_DOCKS_PER_STATION[str(int(X_train[i, -1]))] for i in range(X_train.shape[0])]
     if 'SVR' in ARGS.models_list:
-        # fit SVM
-        clf = make_pipeline(StandardScaler(), SVR(gamma='auto'))
-        clf.fit(X_train, y_train)
-        clfs.append(clf)
+        reg = make_pipeline(StandardScaler(), SVR(gamma='auto'))
+        regs.append(reg)
     if 'XGBoost' in ARGS.models_list:
-        clf = xg.XGBRegressor(objective='reg:squarederror',
+        reg = xg.XGBRegressor(objective='reg:squarederror',
                               n_estimators=20,
                               seed=123)
-        clf.fit(X_train, y_train)
-        clfs.append(clf)
-    return clfs
+        regs.append(reg)
+    if 'Ridge' in ARGS.models_list:
+        reg = linear_model.Ridge(alpha=.5)
+        regs.append(reg)
+    if 'RidgeCV' in ARGS.models_list:
+        # cross val ridge
+        reg = linear_model.RidgeCV(alphas=np.logspace(-6, 6, 13))
+        regs.append(reg)
+    if 'KRidge' in ARGS.models_list:
+        #kernel ridge
+        reg = KernelRidge(alpha=1.0)
+        regs.append(reg)
+    if 'Linear' in ARGS.models_list:
+        reg = linear_model.LinearRegression()
+        regs.append(reg)
+    if 'RandomForest' in ARGS.models_list:
+        reg = RandomForestRegressor()
+        regs.append(reg)
+    if ARGS.fit_ensemble:
+        regs_en = []
+        count = 0
+        for reg in regs:
+            regs_en.append((str(count), reg))
+            count += 1
+        # train all
+        regs = [VotingRegressor(regs_en, n_jobs=-1).fit(X_train, y_train)]
+    else:
+        for reg in regs:
+            reg.fit(X_train, y_train)
+    return regs
 
 
 def run_single_and_all_stations():
@@ -91,7 +120,12 @@ def run_test_preds(dir='./data/test.csv'):
 
 if __name__ == '__main__':
     # Validate on single and all stations
-    run_name = 'z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)
+    run_name = ''
+    for x in ARGS.models_list:
+        run_name += str(x)+'_'
+    if ARGS.features_save:
+        for x in ARGS.features:
+            run_name += str(x)+'_'
     if ARGS.quick_validation:
         results_single, results_all = iterate_all()
         write_results(results_single, run_name+'-single')
