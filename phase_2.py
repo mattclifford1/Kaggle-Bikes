@@ -93,7 +93,7 @@ def print_top_models(dir='./data/Train/Train'):
     # analyse what models are selected/ performing best
     results_dict = {}
     for model in best_model_each_station.values():
-        model_name = '-'.join(model.split('_')[4:])
+        model_name = '-'.join(model[0].split('_')[4:])
         if model_name in results_dict.keys():
             results_dict[model_name] += 1
         else:
@@ -116,14 +116,11 @@ def compare_num_models(dir='./data/Train/Train'):
 
 
 if __name__ == '__main__':
-    compare_num_models()
+    # compare_num_models()
+    print_top_models()
 
-
-    # dict_path = './data/linear_models_MAEs.txt'
-    # load_model = False
-    # if os.path.exists(dict_path) and load_model:
-    #     best_model_each_station = read_dict(dict_path)
-    # else:
-    #     best_model_each_station, mean_all = get_MAE_all_stations_all_models()
-    #     write_dict(best_model_each_station, dict_path)
-    #     print(mean_all)
+    if os.path.exists(dict_path) and load_model:
+        best_model_each_station = read_dict(dict_path)
+    else:
+        best_model_each_station = get_MAE_all_stations_all_models()
+        write_dict(best_model_each_station, dict_path)

@@ -7,6 +7,7 @@ parser.add_argument("--max_docks_per_station_file", default='data/max_docks_per_
 parser.add_argument("--z_norm", default=False, action='store_true')
 parser.add_argument("-q", "--quick_validation", default=False, action='store_true')
 parser.add_argument("--val_runs", default=2, type=int)
+parser.add_argument("--num_phase_2_models", default=3, type=int)
 parser.add_argument("-s", "--save_test_preds", default=False, action='store_true')
 parser.add_argument("-e", "--fit_ensemble", default=False, action='store_true')
 parser.add_argument("-fs", "--features_save", default=False, action='store_true') # save features names to database for plot

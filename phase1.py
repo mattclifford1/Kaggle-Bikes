@@ -121,15 +121,20 @@ def run_test_preds(dir='./data/test.csv'):
 if __name__ == '__main__':
     # Validate on single and all stations
     run_name = ''
-    for x in ARGS.models_list:
-        run_name += str(x)+'_'
     if ARGS.features_save:
         for x in ARGS.features:
+            run_name += str(x)+'-'
+    else:
+        for x in ARGS.models_list:
             run_name += str(x)+'_'
     if ARGS.quick_validation:
         results_single, results_all = iterate_all()
-        write_results(results_single, run_name+'-single')
-        write_results(results_all, run_name+'-all')
+        if ARGS.features_save:
+            write_results(results_single, run_name)
+
+        else:
+            write_results(results_single, run_name+'-single')
+            write_results(results_all, run_name+'-all')
     # get predictions for kaggle test data and save to csv for submission
     if ARGS.save_test_preds:
         y_preds = run_test_preds()

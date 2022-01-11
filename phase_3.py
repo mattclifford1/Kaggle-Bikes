@@ -13,7 +13,6 @@ import pandas as pd
 
 dict_path = './data/linear_models_MAEs.txt'
 load_model = True
-num_phase_2_models = 1
 
 def test_MAE_phase3(X_test, X_test_df, y_test, clfs):
     # MAE - we use this becuase getting close to the true prediction is what we want, not exactly the right bikes like accuracy would give
@@ -96,9 +95,11 @@ def run_test_preds(phase_2_clfs, dir='./data/test.csv'):
 
 if __name__ == '__main__':
     MAEs_dict = get_MAE_all_stations_all_models()
-    phase_2_clfs, _ = get_top_models(MAEs_dict, num_model_to_use=num_phase_2_models)
+    phase_2_clfs, _ = get_top_models(MAEs_dict, num_model_to_use=ARGS.num_phase_2_models)
 
-    run_name = 'phase3_z'+str(ARGS.z_norm)+'_models'+str(ARGS.models_list)+str(ARGS.target)
+    run_name = str(ARGS.num_phase_2_models)+'-pretrained-models_'+'_'
+    for x in ARGS.models_list:
+        run_name += str(x)+'_'
     if ARGS.quick_validation:
         # test on val
         results_single = []
@@ -107,11 +108,10 @@ if __name__ == '__main__':
             single, all = run_single_and_all_stations(phase_2_clfs)
             results_single.append(single)
             results_all.append(all)
-            print('========= ALL =========')
-            print(f'Results on single stations: {sum(results_single)/len(results_single)}')
-            # print(f'Results on all stations: {sum(results_all)/len(results_all)}')
+        print('========= ALL =========')
+        print(f'Results on single stations: {sum(results_single)/len(results_single)}')
 
-        # results_single, results_all = iterate_all()
+        print(run_name)
         write_results(results_single, run_name+'-single')
         # write_results(results_all, run_name+'-all')
 

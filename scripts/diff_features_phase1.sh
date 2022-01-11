@@ -8,10 +8,10 @@ source $CONDA_BASE/etc/profile.d/conda.sh
 VENV=bikes
 conda activate $VENV
 
-# rm valid/results.csv
+rm valid/results.csv
 
 RUNS=10
-MODEL=RandomForest
+MODEL=RandomForest\ XGBoost
 # MODEL=XGBoost
 # MODEL=Linear
 
@@ -24,5 +24,5 @@ python phase1.py -fs -q --val_runs $RUNS -m $MODEL --features 'short_profile_3h_
 python phase1.py -fs -q --val_runs $RUNS -m $MODEL --features 'short_profile_bikes' 'short_profile_3h_diff_bikes' 'isHoliday' 'weekhour' 'day' 'temperature.C'
 python phase1.py -fs -q --val_runs $RUNS -m $MODEL --features 'bikes_3h_ago' 'short_profile_bikes' 'short_profile_3h_diff_bikes' 'isHoliday' 'weekhour' 'day' 'temperature.C'
 
-python plot_results.py diff_features_$MODEL
-mv valid/results.csv valid/diff_features_single_$MODEL.csv
+python plot_results.py diff_features
+mv valid/results.csv valid/diff_features_single.csv
