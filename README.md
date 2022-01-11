@@ -1,5 +1,6 @@
 # Requirements
-A python environment with scikit-learn and XGBoost
+A python environment with `requirements.txt` installed.
+
 The Kaggle dataset
 
 # Usage
